@@ -812,7 +812,10 @@ class stock_picking(osv.osv):
 
         'note': fields.text('Notes'),   
 
+        'export_lc_no' : fields.char(string='Export L/C No.'),
+        'export_lc_date' : fields.date(string='Export L/C Date'),
         'report_paper_format_id':fields.many2one('report.paperformat',string='Paper Title'),
+
         'report_sale_order_id':fields.many2one('sale.order',string='Paper Title'),
         
         'move_type': fields.selection([('direct', 'Partial'), ('one', 'All at once')], 'Delivery Method', required=True, states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, help="It specifies goods to be deliver partially or all at once"),

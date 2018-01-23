@@ -682,6 +682,12 @@
                             <field name="move_lines" context="{'address_in_id': partner_id, 'form_view_ref':'stock.view_move_picking_form', 'tree_view_ref':'stock.view_move_picking_tree', 'default_picking_type_id': picking_type_id,'default_picking_id': active_id}"/>
                             <field name="pack_operation_exist" invisible="1"/>
                             <field name="note" placeholder="Add an internal note..." class="oe_inline"/>
+
+                            <group>
+                                <field name='export_lc_no'/>
+                                <field name='export_lc_date'/>
+                                <field name='report_paper_format_id' widget='many2one_list' />
+                            </group>
                         </page>
                         <page string="Operations" attrs="{'invisible': ['|', ('state','!=','done'), ('pack_operation_ids','=',[])]}">
                             <field name="pack_operation_ids" context="{'default_picking_id': active_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id}">
@@ -720,11 +726,6 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Report Header">
-                            <group>
-			            	    <field name='report_paper_format_id' widget='many2one_list' />
-                            </group>
-			            </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">
