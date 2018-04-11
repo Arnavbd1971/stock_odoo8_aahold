@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <template id="report_picking">
+        <template id="delivery_order">
             <t t-call="report.html_container">
                 <t t-foreach="docs" t-as="o">
                     <t t-call="report.external_layout">
@@ -53,33 +53,20 @@
                                 
                                 <div class="col-xs-5">
                                     <div class="row" style='border:1px solid #000; margin-right:0px !important; padding-right:0px !important;'>
-                                        <div class="col-xs-5">
-                                            <p style='margin-top:3px;'>Delivery Order No.</p>
+                                        <div class="col-xs-12">
+                                            <p style='margin-top:3px;'>Delivery Order No. : <span style='font-weight:bold !important;' t-field="o.do_no"/></p>
                                         </div>
-                                        <div class="col-xs-1">
-                                            <p style='margin-top:3px;'> : </p>
-                                        </div>
-                                        <div class="col-xs-6">
-                                            <p style='margin-top:3px;font-weight:bold;'>
-                                                <span t-field="o.name"/>
-                                            </p>
+                                    </div>
+
+                                    <div class="row" style='border:1px solid #000; margin-right:0px !important; padding-right:0px !important;'>
+                                        <div class="col-xs-12">
+                                            <p style='margin-top:3px;'>Delivery Challan No. : <span style='font-weight:bold !important;' t-field="o.name"/></p>
                                         </div>
                                     </div>
                                 
                                     <div class="row" style='border:1px solid #000; margin-right:0px !important; padding-right:0px !important;'>
-                                        <div class="col-xs-5">
-                                            <p style='margin-top:3px;'>Date</p>
-                                        </div>
-                                        <div class="col-xs-1">
-                                            <p style='margin-top:3px;'> : </p>
-                                        </div>
-                                        <div class="col-xs-6">
-                                            <p style='margin-top:3px;font-weight:bold;'>
-                                                <!-- <span t-field="o.delivery_challan_created_date"/> -->
-                                                <!-- <span t-field="o.date" widget="date"/> -->
-                                                <!-- <span t-esc="time.strftime('%A, %d %B %Y',time.strptime(o.date,'%Y-%m-%d %H:%M:%S'))"/> -->
-                                                <span t-esc="time.strftime('%d %B %Y',time.strptime(o.date,'%Y-%m-%d %H:%M:%S'))"/>
-                                            </p>
+                                        <div class="col-xs-12">
+                                            <p style='margin-top:3px;'>Date : <span style='font-weight:bold !important;' t-esc="time.strftime('%d %B %Y',time.strptime(o.date,'%Y-%m-%d %H:%M:%S'))"/></p>
                                         </div>
                                     </div>
                                 </div>
@@ -105,9 +92,15 @@
                                         
                                         <div t-if="o.partner_id" name="partner_header">
                                             <div t-field="o.partner_id"
-                                               t-field-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": true}'/>
+                                               t-field-options='{"widget": "contact", "fields": ["name", "phone", "fax"], "no_marker": true}'/>
                                             <p t-if="o.partner_id.vat">VAT: <span t-field="o.partner_id.vat"/></p>
                                         </div>
+
+                                        <!-- <div t-if="o.partner_id" name="partner_header">
+                                            <div t-field="o.partner_id"
+                                               t-field-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": true}'/>
+                                            <p t-if="o.partner_id.vat">VAT: <span t-field="o.partner_id.vat"/></p>
+                                        </div> -->
                                     </div>
                                 </div>
                                 <div class="col-xs-2"></div>
@@ -169,7 +162,7 @@
                                     <!-- <t t-if="o.picking_type_id.code != 'incoming'">
                                         <th><strong>Source</strong></th>
                                     </t> -->
-                                    <th class='text-center'><strong>Barcode</strong></th>
+                                    <!-- <th class='text-center'><strong>Barcode</strong></th> -->
                                     <!-- <t t-if="o.picking_type_id.code != 'outgoing'"><th><strong>Destination</strong></th></t> -->
                                 </tr>
                               </thead>
@@ -188,11 +181,11 @@
 
                                         <!-- <t t-if="o.picking_type_id.code != 'incoming'"><td><span t-field="move.location_id"/></td></t> -->
 
-                                        <td>
+                                        <!-- <td>
                                             <span t-if="move.product_id and move.product_id.ean13">
                                                 <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('EAN13', move.product_id.ean13, 600, 100)" style="width:300px;height:50px"/>
                                             </span>
-                                        </td>
+                                        </td> -->
                                         <!-- <t t-if="o.picking_type_id.code != 'outgoing'"><td><span t-field="move.location_dest_id"/></td></t> -->
                                     </t>
                                 </tr>
@@ -207,7 +200,7 @@
 
                                     <!-- <t t-if="o.picking_type_id.code != 'incoming'"><th><strong>Source</strong></th></t> -->
 
-                                    <th class='text-center'><strong>Barcode</strong></th>
+                                    <!-- <th class='text-center'><strong>Barcode</strong></th> -->
                                     <!-- <t t-if="o.picking_type_id.code != 'outgoing'"><th><strong>Destination</strong></th></t> -->
                                 </tr>
                               </thead>
@@ -225,7 +218,7 @@
                                         </td>
                                     </t> -->
 
-                                    <td>
+                                    <!-- <td>
                                         <span t-if="pack_operation.lot_id">
                                             <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', pack_operation.lot_id.name, 600, 100)" style="width:300px;height:50px"/>
                                         </span>
@@ -235,7 +228,7 @@
                                         <span t-if="pack_operation.package_id and not pack_operation.product_id">
                                             <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', pack_operation.package_id.name, 600, 100)" style="width:300px;height:50px"/>
                                         </span>
-                                    </td>
+                                    </td> -->
                                     <!-- <t t-if="o.picking_type_id.code != 'outgoing'"><td><span t-field="pack_operation.location_dest_id"/>
                                         <span t-if="pack_operation.result_package_id">:</span>
                                         <span t-field="pack_operation.result_package_id"/>

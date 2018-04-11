@@ -3,12 +3,12 @@
     <data>
 
         <report 
-            string="Picking" 
-            id="action_report_picking" 
+            string="Delivery Order" 
+            id="action_delivery_order" 
             model="stock.picking" 
             report_type="qweb-pdf"
-            name="stock.report_picking" 
-            file="stock.report_picking" 
+            name="stock.delivery_order" 
+            file="stock.delivery_order" 
         />
         <report 
             string="Inventory" 

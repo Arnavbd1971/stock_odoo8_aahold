@@ -132,6 +132,9 @@ class stock_location(osv.osv):
         'partner_id': fields.many2one('res.partner', 'Owner', help="Owner of the location if not internal"),
 
         'comment': fields.text('Additional Information'),
+
+        # 'can_request': fields.text('can_request'),
+
         'posx': fields.integer('Corridor (X)', help="Optional localization details, for information purpose only"),
         'posy': fields.integer('Shelves (Y)', help="Optional localization details, for information purpose only"),
         'posz': fields.integer('Height (Z)', help="Optional localization details, for information purpose only"),
@@ -670,8 +673,9 @@ class stock_quant(osv.osv):
 class stock_picking(osv.osv):
     _name = "stock.picking"
     _inherit = ['mail.thread']
-    _description = "Picking List"
-    _order = "priority desc, date asc, id desc"
+    _description = "Picking List" 
+    _order = "date desc"
+    # _order = "priority desc, date asc, id desc"
 
     def _set_min_date(self, cr, uid, id, field, value, arg, context=None):
         move_obj = self.pool.get("stock.move")
@@ -803,12 +807,35 @@ class stock_picking(osv.osv):
             packop_ids = [op.id for op in picking.pack_operation_ids]
             self.pool.get('stock.pack.operation').write(cr, uid, packop_ids, {'owner_id': picking.owner_id.id}, context=context)
 
-    _columns = {
-        'name': fields.char('Reference', select=True, states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, copy=False),
+    # def _get_default_warehouse(self, cr, uid, context=None):
+    #     company_id = self.pool.get('res.users')._get_company(cr, uid, context=context)
+    #     warehouse_ids = self.pool.get('stock.warehouse').search(cr, uid, [('company_id', '=', company_id)], context=context)
+    #     if not warehouse_ids:
+    #         return False
+    #     return warehouse_ids[0] 
 
-        'origin': fields.char('Source Document', states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, help="Reference of the document", select=True),
+    # def onchange_warehouse_id(self, cr, uid, ids, warehouse_id, context=None):
+    #     val = {}
+    #     if warehouse_id:
+    #         warehouse = self.pool.get('stock.warehouse').browse(cr, uid, warehouse_id, context=context)
+    #         if warehouse.company_id:
+    #             val['company_id'] = warehouse.company_id.id
+    #     return {'value': val}        
+
+    _columns = {
+        # 'name': fields.char('Delivery Order No.', select=True, states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, copy=False),
+
+        'name': fields.char('Delivery Challan No.', select=True, states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, copy=False),
+
+        'origin': fields.char('P/I No.', states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, help="Reference of the document", select=True),
+
+        # 'pi_type': fields.one2many('sale.order', 'pi_type', 'P/I Type', readonly=True),
+
+        'do_no': fields.char('Delivery Order No.', states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, help="Reference of the document", select=True, ),
 
         'backorder_id': fields.many2one('stock.picking', 'Back Order of', states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, help="If this shipment was split, then this field links to the shipment which contains the already processed part.", select=True, copy=False),
+
+        # 'get_first_order_no': fields.function(_get_product_availability, type='string', string='Quantity Available', readonly=True, help=''),
 
         'note': fields.text('Notes'),   
 
@@ -861,7 +888,8 @@ class stock_picking(osv.osv):
 
         'quant_reserved_exist': fields.function(_get_quant_reserved_exist, type='boolean', string='Quant already reserved ?', help='technical field used to know if there is already at least one quant reserved on moves of a given picking'),
 
-        'partner_id': fields.many2one('res.partner', 'Partner', states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}),
+        # 'partner_id': fields.many2one('res.partner', 'Partner', states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}),
+        'partner_id': fields.many2one('res.partner', 'Customer', states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}),
 
         'company_id': fields.many2one('res.company', 'Company', required=True, select=True, states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}),
 
@@ -888,6 +916,7 @@ class stock_picking(osv.osv):
                   'stock.picking': (lambda self, cr, uid, ids, ctx: ids, ['move_lines'], 10),
                   'stock.move': (_get_pickings, ['group_id', 'picking_id'], 10),
               }),
+        # 'warehouse_id': fields.many2one('stock.warehouse', 'Warehouse', required=True),      
     }
 
     _defaults = {
@@ -898,6 +927,7 @@ class stock_picking(osv.osv):
         'date': fields.datetime.now,
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'stock.picking', context=c),
         'recompute_pack_op': True,
+        # 'warehouse_id': _get_default_warehouse,
     }
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),
@@ -906,7 +936,7 @@ class stock_picking(osv.osv):
     def do_print_picking(self, cr, uid, ids, context=None):
         '''This function prints the picking list'''
         context = dict(context or {}, active_ids=ids)
-        return self.pool.get("report").get_action(cr, uid, ids, 'stock.report_picking', context=context)
+        return self.pool.get("report").get_action(cr, uid, ids, 'stock.delivery_order', context=context)
 
 
     def action_confirm(self, cr, uid, ids, context=None):
@@ -998,6 +1028,10 @@ class stock_picking(osv.osv):
             self.do_recompute_remaining_quantities(cr, uid, ids, context=context)
         return res
 
+
+
+
+
     def _create_backorder(self, cr, uid, picking, backorder_moves=[], context=None):
         """ Move all non-done lines into a new backorder picking. If the key 'do_only_split' is given in the context, then move all lines not in context.get('split', []) instead of all non-done lines.
         """
@@ -1007,11 +1041,20 @@ class stock_picking(osv.osv):
         if 'do_only_split' in context and context['do_only_split']:
             backorder_move_ids = [x.id for x in backorder_moves if x.id not in context.get('split', [])]
 
+        # service_obj= self.pool.get('stock.picking').search(cr, uid,[('origin','=',picking.origin),],context=context, limit=1)
+        # stock_p= self.pool.get('stock.picking').read(cr, uid,service_obj,['id'], context=context)
+        # pi_id = self.split_from_list(stock_p,'id')
+        
+        # search(cr, uid, [('default_code','=', res.group(2))] + args, limit=limit, context=context)
+
+        # priority = service_obj.id
+
         if backorder_move_ids:
             backorder_id = self.copy(cr, uid, picking.id, {
                 'name': '/',
                 'move_lines': [],
                 'pack_operation_ids': [],
+                # 'backorder_id': pi_id,
                 'backorder_id': picking.id,
             })
             backorder = self.browse(cr, uid, backorder_id, context=context)
@@ -1024,6 +1067,14 @@ class stock_picking(osv.osv):
             self.action_confirm(cr, uid, [backorder_id], context=context)
             return backorder_id
         return False
+
+
+    # def split_from_list(self,list_name,data_field):
+    #     save = []
+    #     for r in list_name:
+    #         save.append(r[data_field])
+    #         combine = '\n'.join([str(i) for i in save])
+    #     return combine  
 
     @api.cr_uid_ids_context
     def recheck_availability(self, cr, uid, picking_ids, context=None):

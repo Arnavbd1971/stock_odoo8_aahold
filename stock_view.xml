@@ -96,8 +96,9 @@
                 </header>
                 <sheet>
                     <div class="oe_title">
+                    <!-- do_no -->
                         <label for="name" class="oe_edit_only"/>
-                        <h1><field name="name" placeholder="e.g. Annual inventory"/></h1>
+                        <h1> <field name="name" placeholder="e.g. Annual inventory"/></h1>
                     </div>
                     <group>
                         <group>
@@ -618,15 +619,17 @@
             <field name="model">stock.picking</field>
             <field name="arch" type="xml">
                 <tree colors="blue:state == 'draft';grey:state == 'cancel';red:state not in ('cancel', 'done') and min_date &lt; current_date" string="Picking list">
+                    <field name="do_no"/>
                     <field name="name"/>
-                    <field name="location_dest_id"/>
+                    <field name="origin"/>
                     <field name="partner_id"/>
+                    <field name="location_dest_id"/>
                     <field name="date"/>
                     <field name="min_date" invisible="1"/>
-                    <field name="origin"/>
                     <field name="group_id" invisible="1"/>
-                    <field name="backorder_id"/>
+                    <field name="backorder_id"/> 
                     <field name="state"/>
+                    <!-- <field name="qty"/> -->
                     <field name="priority" invisible="1"/>
                     <field name="picking_type_id" invisible="1"/>
                 </tree>
@@ -656,7 +659,10 @@
                         <button name="do_partial_open_barcode" groups="stock.group_stock_user" type="object" class="oe_stock_scan_button" attrs="{'invisible': ['|',('pack_operation_exist', '=', True),('state','not in',('assigned', 'partially_available'))]}"><img src="/stock/static/src/img/scan.png" class="oe_stock_scan_image oe_stock_scan_image_btn"/></button>
                         <button name="open_barcode_interface" groups="stock.group_stock_user" type="object" class="oe_stock_scan_button" attrs="{'invisible': ['|',('pack_operation_exist', '=', False),('state','not in',('assigned', 'partially_available'))]}"><img src="/stock/static/src/img/scan.png" class="oe_stock_scan_image oe_stock_scan_image_btn"/></button>
                     </div>
-                    <h1>
+                    <h1> Delivey Order No. :
+                        <field name="do_no" class="oe_inline" attrs="{'invisible': [('name','=','/')]}" readonly="1"/>
+                    </h1>
+                    <h1> Delivey Challan No. :
                         <field name="name" class="oe_inline" attrs="{'invisible': [('name','=','/')]}" readonly="1"/>
                     </h1>
                     <group>
@@ -674,6 +680,7 @@
                                 <button name="action_assign_owner" string="Assign Owner" type="object" attrs="{'invisible': ['|',('pack_operation_exist', '=', False),('state', 'not in', ('draft','assigned','confirmed'))]}"
                                     class="oe_link oe_edit_only"/>
                             </div>
+                            <!-- <field name="warehouse_id" on_change="onchange_warehouse_id(warehouse_id)" options="{'no_create': True}" groups="stock.group_locations"/> -->
                         </group>
                     </group>
                     <notebook>
